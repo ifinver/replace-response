@@ -1,4 +1,4 @@
-module github.com/ifinver/replace-response
+module github.com/caddyserver/replace-response
 
 go 1.18
 

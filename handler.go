@@ -29,6 +29,7 @@ import (
 	"github.com/caddyserver/caddy/v2/caddyconfig/caddyfile"
 	"github.com/caddyserver/caddy/v2/modules/caddyhttp"
 	"github.com/icholy/replace"
+	"go.uber.org/zap"
 	"golang.org/x/text/transform"
 )
 
@@ -52,6 +53,8 @@ type Handler struct {
 	Stream bool `json:"stream,omitempty"`
 
 	transformerPool *sync.Pool
+
+	logger *zap.Logger
 }
 
 // CaddyModule returns the Caddy module information.
@@ -68,6 +71,8 @@ func (h *Handler) Provision(ctx caddy.Context) error {
 		return fmt.Errorf("no replacements configured")
 	}
 
+	h.logger = ctx.Logger()
+
 	// prepare each replacement
 	for i, repl := range h.Replacements {
 		if repl.Search == "" && repl.SearchRegexp == "" {
@@ -82,6 +87,7 @@ func (h *Handler) Provision(ctx caddy.Context) error {
 				return fmt.Errorf("replacement %d: %v", i, err)
 			}
 			repl.re = re
+			h.logger.Warn("replacement : Compiled a regex : " + repl.SearchRegexp)
 		}
 	}
 
